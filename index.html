@@ -20,57 +20,84 @@
 
     <script>
         function convert() {
-    let latex = document.getElementById("latexInput").value;
+            let latex = document.getElementById("latexInput").value;
 
-    // ... (keep existing initial cleanup code) ...
+            // Initialize title, author, and date variables
+            let title = '', author = '', date = '';
 
-    let markdown = latex
-        // Lists - Enhanced version
-        .replace(/\\begin\{itemize\}([\s\S]*?)\\end\{itemize\}/g, (match, content) => {
-            return content.split('\\item').slice(1)
-                .map(item => '- ' + item.trim())
-                .join('\n');
-        })
-        .replace(/\\begin\{enumerate\}([\s\S]*?)\\end\{enumerate\}/g, (match, content) => {
-            return content.split('\\item').slice(1)
-                .map((item, index) => `${index + 1}. ${item.trim()}`)
-                .join('\n');
-        })
-        
-        // Verbatim environments
-        .replace(/\\begin\{verbatim\}([\s\S]*?)\\end\{verbatim\}/g, (match, content) => {
-            return '\n```\n' + content.trim() + '\n```\n';
-        })
-        
-        // Text formatting - Enhanced version
-        .replace(/\\texttt\{([^}]+)\}/g, '`$1`')
-        .replace(/\\textbf\{([^}]+)\}/g, '**$1**')
-        .replace(/\\textit\{([^}]+)\}/g, '*$1*')
-        .replace(/\\emph\{([^}]+)\}/g, '*$1*')
-        
-        // Simple items outside environments
-        .replace(/\\item\s+/g, '- ')
-        
-        // Headers (keep existing code)
-        .replace(/\\section\{(.*?)\}/g, '# $1\n')
-        .replace(/\\subsection\{(.*?)\}/g, '## $1\n')
-        .replace(/\\subsubsection\{(.*?)\}/g, '### $1\n')
-        
-        // URLs and links (enhanced)
-        .replace(/\\url\{([^}]+)\}/g, '<$1>')
-        .replace(/\\href\{([^}]+)\}\{([^}]+)\}/g, '[$2]($1)')
-        
-        // Clean up extra whitespace and newlines
-        .replace(/\n\s*\n\s*\n/g, '\n\n')
-        .replace(/\n\s+/g, '\n')
-        .trim();
+            // Extract title, author, and date if present
+            const titleMatch = latex.match(/\\title\{(.*?)\}/);
+            const authorMatch = latex.match(/\\author\{(.*?)\}/);
+            const dateMatch = latex.match(/\\date\{(.*?)\}/);
 
-    // Combine all elements
-    markdown = title + author + date + markdown;
+            if (titleMatch) {
+                title = `# ${titleMatch[1]}\n\n`;
+                latex = latex.replace(/\\title\{.*?\}/, '');
+            }
+            if (authorMatch) {
+                author = `*${authorMatch[1]}*\n\n`;
+                latex = latex.replace(/\\author\{.*?\}/, '');
+            }
+            if (dateMatch) {
+                date = `*${dateMatch[1]}*\n\n`;
+                latex = latex.replace(/\\date\{.*?\}/, '');
+            }
 
-    // Display the converted Markdown
-    document.getElementById("markdownOutput").innerText = markdown || "Conversion failed";
-}
+            // Remove LaTeX document class and package declarations
+            latex = latex.replace(/\\documentclass.*?\n/g, '')
+                .replace(/\\usepackage.*?\n/g, '')
+                .replace(/\\begin\{document\}/g, '')
+                .replace(/\\end\{document\}/g, '')
+                .replace(/\\maketitle/g, '');
+
+            let markdown = latex
+                // Lists - Enhanced version
+                .replace(/\\begin\{itemize\}([\s\S]*?)\\end\{itemize\}/g, (match, content) => {
+                    return content.split('\\item').slice(1)
+                        .map(item => '- ' + item.trim())
+                        .join('\n');
+                })
+                .replace(/\\begin\{enumerate\}([\s\S]*?)\\end\{enumerate\}/g, (match, content) => {
+                    return content.split('\\item').slice(1)
+                        .map((item, index) => `${index + 1}. ${item.trim()}`)
+                        .join('\n');
+                })
+                
+                // Verbatim environments
+                .replace(/\\begin\{verbatim\}([\s\S]*?)\\end\{verbatim\}/g, (match, content) => {
+                    return '\n```\n' + content.trim() + '\n```\n';
+                })
+                
+                // Text formatting - Enhanced version
+                .replace(/\\texttt\{([^}]+)\}/g, '`$1`')
+                .replace(/\\textbf\{([^}]+)\}/g, '**$1**')
+                .replace(/\\textit\{([^}]+)\}/g, '*$1*')
+                .replace(/\\emph\{([^}]+)\}/g, '*$1*')
+                
+                // Simple items outside environments
+                .replace(/\\item\s+/g, '- ')
+                
+                // Headers
+                .replace(/\\section\{(.*?)\}/g, '# $1\n')
+                .replace(/\\subsection\{(.*?)\}/g, '## $1\n')
+                .replace(/\\subsubsection\{(.*?)\}/g, '### $1\n')
+                
+                // URLs and links
+                .replace(/\\url\{([^}]+)\}/g, '<$1>')
+                .replace(/\\href\{([^}]+)\}\{([^}]+)\}/g, '[$2]($1)')
+                
+                // Clean up extra whitespace and newlines
+                .replace(/\n\s*\n\s*\n/g, '\n\n')
+                .replace(/\n\s+/g, '\n')
+                .trim();
+
+            // Combine all elements
+            markdown = title + author + date + markdown;
+
+            // Display the converted Markdown
+            document.getElementById("markdownOutput").innerText = markdown || "Conversion failed";
+        }
+
 
     </script>
 </body>
