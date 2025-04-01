@@ -282,37 +282,54 @@
                 })
 
                 // Simple items (outside environments) with proper spacing
-                .replace(/\\item\s+/g, '\n- ')
+                .replace(/\\item\s+/g, '\n\n- ')
 
                 // URLs and links
                 .replace(/\\url\{([^}]+)\}/g, '<$1>')
                 .replace(/\\href\{([^}]+)\}\{([^}]+)\}/g, '[$2]($1)')
 
+                // Handle LaTeX environments
+                .replace(/\\begin\{(.*?)\}([\s\S]*?)\\end\{\1\}/g, (match, env, content) => {
+                    return '\n\n' + content.trim() + '\n\n';
+                })
+
                 // Cleanup and spacing fixes
-                .replace(/\n{3,}/g, '\n\n')
-                .replace(/^\s+|\s+$/gm, '')
-                .replace(/\n\s+\n/g, '\n\n')
-                .split('\n')
-                .map(line => line.trim())
-                .join('\n')
-                .replace(/([^.\n])\n([^-\d#>*\n])/g, '$1 $2')
-                .replace(/\n{3,}/g, '\n\n')
-                .trim();
+                .replace(/\n{3,}/g, '\n\n')        // Reduce multiple blank lines to double
+                .replace(/^\s+|\s+$/gm, '')        // Trim whitespace from line starts/ends
+                .replace(/\n\s+\n/g, '\n\n')       // Replace lines with only whitespace
+                .split('\n')                       // Split into lines
+                .map(line => line.trim())          // Trim each line
+                .join('\n')                        // Rejoin with single newlines
+                
+                // Preserve line breaks for specific patterns
+                .replace(/([^.\n])\n(?=[A-Z])/g, '$1\n\n')  // Add extra newline before capital letters
+                .replace(/([.!?])\s*\n/g, '$1\n\n')         // Add extra newline after sentence endings
+                .replace(/\n([-\d#>*])/g, '\n\n$1')         // Add extra newline before list items and headers
+                .replace(/([^-\d#>*\n])\n([^-\d#>*\n])/g, '$1 $2')  // Join normal text lines
+                
+                // Final cleanup
+                .replace(/\n{3,}/g, '\n\n')        // Clean up any triple+ newlines
+                .trim();                           // Trim the final result
 
             // Combine all elements with proper spacing
             markdown = title + author + date + markdown;
 
             // Ensure proper spacing between sections
             markdown = markdown
-                .replace(/\n# /g, '\n\n# ')
-                .replace(/\n- /g, '\n\n- ')
-                .replace(/\n\d+\. /g, '\n\n$&')
-                .replace(/\n{3,}/g, '\n\n')
+                .replace(/\n# /g, '\n\n# ')        // Add space before headers
+                .replace(/\n## /g, '\n\n## ')      // Add space before subheaders
+                .replace(/\n### /g, '\n\n### ')    // Add space before subsubheaders
+                .replace(/\n- /g, '\n\n- ')        // Add space before list items
+                .replace(/\n\d+\. /g, '\n\n$&')    // Add space before numbered lists
+                .replace(/```\n\n/g, '```\n')      // Fix code block spacing
+                .replace(/\n\n```/g, '\n```')      // Fix code block spacing
+                .replace(/\n{3,}/g, '\n\n')        // Clean up any resulting triple newlines
                 .trim();
 
             // Display the converted Markdown
             document.getElementById("markdownOutput").value = markdown || "Conversion failed";
         }
+
 
         async function copyOutput() {
             const output = document.getElementById("markdownOutput").value;
