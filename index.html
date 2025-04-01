@@ -34,36 +34,41 @@
             width: 100%;
             top: 0;
             z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .header h1 {
             font-size: 1.5rem;
             color: var(--primary-color);
-            margin-bottom: 0.5rem;
+            margin: 0;
         }
 
         .container {
             display: flex;
             padding-top: 80px;
             height: calc(100vh - 80px);
+            gap: 1rem;
+            padding: 80px 1rem 1rem 1rem;
         }
 
         .editor-pane {
             flex: 1;
             display: flex;
             flex-direction: column;
-            padding: 1rem;
             background-color: white;
-            margin: 0.5rem;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            min-width: 0; /* Prevents flex item overflow */
         }
 
         .pane-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 1rem;
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
         }
 
         .pane-title {
@@ -76,8 +81,7 @@
             flex: 1;
             width: 100%;
             padding: 1rem;
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
+            border: none;
             font-family: 'Consolas', 'Monaco', monospace;
             font-size: 0.9rem;
             line-height: 1.5;
@@ -90,8 +94,13 @@
 
         .editor:focus {
             outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.1);
+            background-color: #ffffff;
+        }
+
+        #markdownOutput {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
         }
 
         .button {
@@ -102,11 +111,16 @@
             border-radius: 4px;
             cursor: pointer;
             font-size: 0.9rem;
-            transition: background-color 0.2s;
+            transition: all 0.2s ease;
         }
 
         .button:hover {
             background-color: #1976D2;
+            transform: translateY(-1px);
+        }
+
+        .button:active {
+            transform: translateY(0);
         }
 
         .button-secondary {
@@ -120,14 +134,27 @@
             background-color: rgba(33, 150, 243, 0.1);
         }
 
+        .button-group {
+            display: flex;
+            gap: 0.5rem;
+        }
+
         @media (max-width: 768px) {
             .container {
                 flex-direction: column;
+                padding-top: 70px;
             }
 
             .editor-pane {
-                margin: 0.5rem;
                 height: calc(50vh - 60px);
+            }
+
+            .header {
+                padding: 0.75rem;
+            }
+
+            .header h1 {
+                font-size: 1.2rem;
             }
         }
 
@@ -149,6 +176,15 @@
         [data-theme="dark"] .header {
             background-color: #2d2d2d;
         }
+
+        [data-theme="dark"] .button-secondary {
+            color: #ffffff;
+            border-color: #ffffff;
+        }
+
+        [data-theme="dark"] .button-secondary:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
     </style>
 </head>
 <body>
@@ -163,18 +199,18 @@
                 <span class="pane-title">LaTeX Input</span>
                 <button class="button button-secondary" onclick="clearInput()">Clear</button>
             </div>
-            <textarea id="latexInput" class="editor" placeholder="Enter LaTeX code here..."></textarea>
+            <textarea id="latexInput" class="editor" placeholder="Enter LaTeX code here..." spellcheck="false"></textarea>
         </div>
 
         <div class="editor-pane">
             <div class="pane-header">
                 <span class="pane-title">Markdown Output</span>
-                <div>
+                <div class="button-group">
                     <button class="button" onclick="convert()">Convert</button>
                     <button class="button button-secondary" onclick="copyOutput()">Copy</button>
                 </div>
             </div>
-            <textarea id="markdownOutput" class="editor" readonly placeholder="Converted Markdown will appear here..."></textarea>
+            <textarea id="markdownOutput" class="editor" readonly placeholder="Converted Markdown will appear here..." spellcheck="false"></textarea>
         </div>
     </div>
 
@@ -253,48 +289,66 @@
                 .replace(/\\href\{([^}]+)\}\{([^}]+)\}/g, '[$2]($1)')
 
                 // Cleanup and spacing fixes
-                .replace(/\n{3,}/g, '\n\n')        // Reduce multiple blank lines to double
-                .replace(/^\s+|\s+$/gm, '')        // Trim whitespace from line starts/ends
-                .replace(/\n\s+\n/g, '\n\n')       // Replace lines with only whitespace
-                .split('\n')                        // Split into lines
-                .map(line => line.trim())          // Trim each line
-                .join('\n')                        // Rejoin with single newlines
-                .replace(/([^.\n])\n([^-\d#>*\n])/g, '$1 $2')  // Join wrapped lines except lists/headers
-                .replace(/\n{3,}/g, '\n\n')        // Final cleanup of multiple blank lines
-                .trim();                           // Trim the final result
+                .replace(/\n{3,}/g, '\n\n')
+                .replace(/^\s+|\s+$/gm, '')
+                .replace(/\n\s+\n/g, '\n\n')
+                .split('\n')
+                .map(line => line.trim())
+                .join('\n')
+                .replace(/([^.\n])\n([^-\d#>*\n])/g, '$1 $2')
+                .replace(/\n{3,}/g, '\n\n')
+                .trim();
 
             // Combine all elements with proper spacing
             markdown = title + author + date + markdown;
 
             // Ensure proper spacing between sections
             markdown = markdown
-                .replace(/\n# /g, '\n\n# ')        // Add space before headers
-                .replace(/\n- /g, '\n\n- ')        // Add space before list items
-                .replace(/\n\d+\. /g, '\n\n$&')    // Add space before numbered lists
-                .replace(/\n{3,}/g, '\n\n')        // Clean up any resulting triple newlines
+                .replace(/\n# /g, '\n\n# ')
+                .replace(/\n- /g, '\n\n- ')
+                .replace(/\n\d+\. /g, '\n\n$&')
+                .replace(/\n{3,}/g, '\n\n')
                 .trim();
 
             // Display the converted Markdown
-            document.getElementById("markdownOutput").innerText = markdown || "Conversion failed";
+            document.getElementById("markdownOutput").value = markdown || "Conversion failed";
+        }
+
+        async function copyOutput() {
+            const output = document.getElementById("markdownOutput").value;
+            try {
+                await navigator.clipboard.writeText(output);
+                
+                // Visual feedback
+                const copyButton = event.target;
+                const originalText = copyButton.textContent;
+                copyButton.textContent = "Copied!";
+                setTimeout(() => {
+                    copyButton.textContent = originalText;
+                }, 2000);
+            } catch (err) {
+                // Fallback for older browsers
+                const output = document.getElementById("markdownOutput");
+                output.select();
+                try {
+                    document.execCommand("copy");
+                    
+                    // Visual feedback
+                    const copyButton = event.target;
+                    const originalText = copyButton.textContent;
+                    copyButton.textContent = "Copied!";
+                    setTimeout(() => {
+                        copyButton.textContent = originalText;
+                    }, 2000);
+                } catch (err) {
+                    console.error('Failed to copy text: ', err);
+                }
+            }
         }
 
         function clearInput() {
             document.getElementById("latexInput").value = "";
             document.getElementById("markdownOutput").value = "";
-        }
-
-        function copyOutput() {
-            const output = document.getElementById("markdownOutput");
-            output.select();
-            document.execCommand("copy");
-            
-            // Visual feedback
-            const copyButton = event.target;
-            const originalText = copyButton.textContent;
-            copyButton.textContent = "Copied!";
-            setTimeout(() => {
-                copyButton.textContent = originalText;
-            }, 2000);
         }
 
         function toggleTheme() {
