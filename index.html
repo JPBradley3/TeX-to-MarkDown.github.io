@@ -247,55 +247,73 @@
                 .replace(/\\maketitle/g, '');
 
             let markdown = latex
-                // Fix spacing issues around headers
-                .replace(/\\section\{(.*?)\}/g, '\n# $1\n\n')
-                .replace(/\\subsection\{(.*?)\}/g, '\n## $1\n\n')
-                .replace(/\\subsubsection\{(.*?)\}/g, '\n### $1\n\n')
+                // Headers with proper spacing
+                .replace(/\\section\{(.*?)\}/g, '\n\n# $1\n\n')
+                .replace(/\\subsection\{(.*?)\}/g, '\n\n## $1\n\n')
+                .replace(/\\subsubsection\{(.*?)\}/g, '\n\n### $1\n\n')
 
-                // Improved list handling
+                // Improved list handling with proper spacing
                 .replace(/\\begin\{itemize\}([\s\S]*?)\\end\{itemize\}/g, (match, content) => {
-                    return '\n' + content.split('\\item')
+                    const items = content.split('\\item')
                         .slice(1)
-                        .map(item => '- ' + item.trim())
-                        .join('\n') + '\n';
+                        .map(item => item.trim())
+                        .map(item => '- ' + item)
+                        .join('\n');
+                    return '\n\n' + items + '\n\n';
                 })
                 .replace(/\\begin\{enumerate\}([\s\S]*?)\\end\{enumerate\}/g, (match, content) => {
-                    return '\n' + content.split('\\item')
+                    const items = content.split('\\item')
                         .slice(1)
-                        .map((item, index) => `${index + 1}. ${item.trim()}`)
-                        .join('\n') + '\n';
+                        .map(item => item.trim())
+                        .map((item, index) => `${index + 1}. ${item}`)
+                        .join('\n');
+                    return '\n\n' + items + '\n\n';
                 })
 
-                // Improved text formatting
+                // Text formatting
                 .replace(/\\textbf\{([^}]+)\}/g, '**$1**')
                 .replace(/\\textit\{([^}]+)\}/g, '*$1*')
                 .replace(/\\texttt\{([^}]+)\}/g, '`$1`')
                 .replace(/\\emph\{([^}]+)\}/g, '*$1*')
 
-                // Code blocks
+                // Code blocks with proper spacing
                 .replace(/\\begin\{verbatim\}([\s\S]*?)\\end\{verbatim\}/g, (match, content) => {
-                    return '\n```\n' + content.trim() + '\n```\n';
+                    return '\n\n```\n' + content.trim() + '\n```\n\n';
                 })
 
-                // Simple items (outside environments)
-                .replace(/\\item\s+/g, '- ')
+                // Simple items (outside environments) with proper spacing
+                .replace(/\\item\s+/g, '\n- ')
 
                 // URLs and links
                 .replace(/\\url\{([^}]+)\}/g, '<$1>')
                 .replace(/\\href\{([^}]+)\}\{([^}]+)\}/g, '[$2]($1)')
 
-                // Fix spacing issues
-                .replace(/\n{3,}/g, '\n\n')        // Remove extra blank lines
-                .replace(/\n\s+\n/g, '\n\n')       // Remove lines with only whitespace
-                .replace(/([^.\n])\n([^-\d#>*])/g, '$1 $2')  // Join wrapped lines
-                .trim();
+                // Cleanup and spacing fixes
+                .replace(/\n{3,}/g, '\n\n')        // Reduce multiple blank lines to double
+                .replace(/^\s+|\s+$/gm, '')        // Trim whitespace from line starts/ends
+                .replace(/\n\s+\n/g, '\n\n')       // Replace lines with only whitespace
+                .split('\n')                        // Split into lines
+                .map(line => line.trim())          // Trim each line
+                .join('\n')                        // Rejoin with single newlines
+                .replace(/([^.\n])\n([^-\d#>*\n])/g, '$1 $2')  // Join wrapped lines except lists/headers
+                .replace(/\n{3,}/g, '\n\n')        // Final cleanup of multiple blank lines
+                .trim();                           // Trim the final result
 
-            // Combine all elements
+            // Combine all elements with proper spacing
             markdown = title + author + date + markdown;
+
+            // Ensure proper spacing between sections
+            markdown = markdown
+                .replace(/\n# /g, '\n\n# ')        // Add space before headers
+                .replace(/\n- /g, '\n\n- ')        // Add space before list items
+                .replace(/\n\d+\. /g, '\n\n$&')    // Add space before numbered lists
+                .replace(/\n{3,}/g, '\n\n')        // Clean up any resulting triple newlines
+                .trim();
 
             // Display the converted Markdown
             document.getElementById("markdownOutput").innerText = markdown || "Conversion failed";
         }
+
 
 
 
