@@ -214,7 +214,7 @@
                 body.setAttribute("data-theme", "dark");
             }
         }
-        
+
         function convert() {
             let latex = document.getElementById("latexInput").value;
 
@@ -247,44 +247,47 @@
                 .replace(/\\maketitle/g, '');
 
             let markdown = latex
-                // Lists - Enhanced version
+                // Fix spacing issues around headers
+                .replace(/\\section\{(.*?)\}/g, '\n# $1\n\n')
+                .replace(/\\subsection\{(.*?)\}/g, '\n## $1\n\n')
+                .replace(/\\subsubsection\{(.*?)\}/g, '\n### $1\n\n')
+
+                // Improved list handling
                 .replace(/\\begin\{itemize\}([\s\S]*?)\\end\{itemize\}/g, (match, content) => {
-                    return content.split('\\item').slice(1)
+                    return '\n' + content.split('\\item')
+                        .slice(1)
                         .map(item => '- ' + item.trim())
-                        .join('\n');
+                        .join('\n') + '\n';
                 })
                 .replace(/\\begin\{enumerate\}([\s\S]*?)\\end\{enumerate\}/g, (match, content) => {
-                    return content.split('\\item').slice(1)
+                    return '\n' + content.split('\\item')
+                        .slice(1)
                         .map((item, index) => `${index + 1}. ${item.trim()}`)
-                        .join('\n');
+                        .join('\n') + '\n';
                 })
-                
-                // Verbatim environments
+
+                // Improved text formatting
+                .replace(/\\textbf\{([^}]+)\}/g, '**$1**')
+                .replace(/\\textit\{([^}]+)\}/g, '*$1*')
+                .replace(/\\texttt\{([^}]+)\}/g, '`$1`')
+                .replace(/\\emph\{([^}]+)\}/g, '*$1*')
+
+                // Code blocks
                 .replace(/\\begin\{verbatim\}([\s\S]*?)\\end\{verbatim\}/g, (match, content) => {
                     return '\n```\n' + content.trim() + '\n```\n';
                 })
-                
-                // Text formatting - Enhanced version
-                .replace(/\\texttt\{([^}]+)\}/g, '`$1`')
-                .replace(/\\textbf\{([^}]+)\}/g, '**$1**')
-                .replace(/\\textit\{([^}]+)\}/g, '*$1*')
-                .replace(/\\emph\{([^}]+)\}/g, '*$1*')
-                
-                // Simple items outside environments
+
+                // Simple items (outside environments)
                 .replace(/\\item\s+/g, '- ')
-                
-                // Headers
-                .replace(/\\section\{(.*?)\}/g, '# $1\n')
-                .replace(/\\subsection\{(.*?)\}/g, '## $1\n')
-                .replace(/\\subsubsection\{(.*?)\}/g, '### $1\n')
-                
+
                 // URLs and links
                 .replace(/\\url\{([^}]+)\}/g, '<$1>')
                 .replace(/\\href\{([^}]+)\}\{([^}]+)\}/g, '[$2]($1)')
-                
-                // Clean up extra whitespace and newlines
-                .replace(/\n\s*\n\s*\n/g, '\n\n')
-                .replace(/\n\s+/g, '\n')
+
+                // Fix spacing issues
+                .replace(/\n{3,}/g, '\n\n')        // Remove extra blank lines
+                .replace(/\n\s+\n/g, '\n\n')       // Remove lines with only whitespace
+                .replace(/([^.\n])\n([^-\d#>*])/g, '$1 $2')  // Join wrapped lines
                 .trim();
 
             // Combine all elements
@@ -293,6 +296,7 @@
             // Display the converted Markdown
             document.getElementById("markdownOutput").innerText = markdown || "Conversion failed";
         }
+
 
 
     </script>
