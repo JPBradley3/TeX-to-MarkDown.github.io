@@ -21,16 +21,54 @@
     <script>
         function convert() {
             let latex = document.getElementById("latexInput").value;
-            fetch("/convert", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ latex })
-            })
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById("markdownOutput").innerText = data.markdown || "Conversion failed";
-            })
-            .catch(error => console.error("Error:", error));
+
+            // Conversion logic: Replace LaTeX commands with Markdown equivalents
+            let markdown = latex
+                // Text formatting
+                .replace(/\\textbf\{(.*?)\}/g, "**$1**") // Convert bold text
+                .replace(/\\textit\{(.*?)\}/g, "_$1_")  // Convert italic text
+
+                // Headers
+                .replace(/\\section\{(.*?)\}/g, "# $1") // Convert sections to Markdown headers
+                .replace(/\\subsection\{(.*?)\}/g, "## $1") // Convert subsections to Markdown headers
+                .replace(/\\subsubsection\{(.*?)\}/g, "### $1") // Convert subsubsections
+
+                // Lists
+                .replace(/\\begin\{itemize\}/g, "") // Remove itemize environment start
+                .replace(/\\end\{itemize\}/g, "")   // Remove itemize environment end
+                .replace(/\\item\s/g, "- ")         // Convert items to Markdown list items
+                .replace(/\\begin\{enumerate\}/g, "") // Remove enumerate environment start
+                .replace(/\\end\{enumerate\}/g, "")   // Remove enumerate environment end
+
+                // Inline math
+                .replace(/\\\(([\s\S]*?)\\\)/g, "`$1`") // Inline math
+                .replace(/\\\[([\s\S]*?)\\\]/g, "`$1`") // Inline math
+
+                // Block math
+                .replace(/\\begin\{equation\}([\s\S]*?)\\end\{equation\}/g, "```\n$1\n```") // Block math
+                .replace(/\\begin\{align\}([\s\S]*?)\\end\{align\}/g, "```\n$1\n```") // Align environment
+
+                // Tables
+                .replace(/\\begin\{tabular\}([\s\S]*?)\\end\{tabular\}/g, (match, content) => {
+                    // Convert tabular to Markdown table
+                    const rows = content.trim().split("\\\\");
+                    const table = rows.map(row => {
+                        return "| " + row.trim().split("&").map(cell => cell.trim()).join(" | ") + " |";
+                    });
+                    const headerSeparator = "| " + rows[0].trim().split("&").map(() => "---").join(" | ") + " |";
+                    return [table[0], headerSeparator, ...table.slice(1)].join("\n");
+                })
+
+                // Figures
+                .replace(/\\includegraphics\[.*?\]\{(.*?)\}/g, "![]($1)") // Convert images
+                .replace(/\\caption\{(.*?)\}/g, "<figcaption>$1</figcaption>") // Convert captions
+
+                // Citations
+                .replace(/\\cite\{(.*?)\}/g, "[@$1]") // Convert citations
+                .replace(/\\bibliography\{(.*?)\}/g, "References: $1"); // Convert bibliography
+
+            // Display the converted Markdown
+            document.getElementById("markdownOutput").innerText = markdown || "Conversion failed";
         }
     </script>
 </body>
