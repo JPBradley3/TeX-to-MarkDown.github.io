@@ -22,50 +22,89 @@
         function convert() {
             let latex = document.getElementById("latexInput").value;
 
-            // Conversion logic: Replace LaTeX commands with Markdown equivalents
-            let markdown = latex
-                // Text formatting
-                .replace(/\\textbf\{(.*?)\}/g, "**$1**") // Convert bold text
-                .replace(/\\textit\{(.*?)\}/g, "_$1_")  // Convert italic text
+            // Remove LaTeX document class and package declarations
+            latex = latex.replace(/\\documentclass.*?\n/g, '')
+                .replace(/\\usepackage.*?\n/g, '')
+                .replace(/\\begin\{document\}/g, '')
+                .replace(/\\end\{document\}/g, '');
 
+            // Handle title, author, and date
+            let title = '', author = '', date = '';
+            const titleMatch = latex.match(/\\title\{(.*?)\}/);
+            const authorMatch = latex.match(/\\author\{(.*?)\}/);
+            const dateMatch = latex.match(/\\date\{(.*?)\}/);
+
+            if (titleMatch) {
+                title = `# ${titleMatch[1]}\n\n`;
+                latex = latex.replace(/\\title\{.*?\}/, '');
+            }
+            if (authorMatch) {
+                author = `*${authorMatch[1]}*\n\n`;
+                latex = latex.replace(/\\author\{.*?\}/, '');
+            }
+            if (dateMatch) {
+                date = `*${dateMatch[1]}*\n\n`;
+                latex = latex.replace(/\\date\{.*?\}/, '');
+            }
+
+            // Remove \maketitle
+            latex = latex.replace(/\\maketitle/, '');
+
+            // Convert the rest of the document
+            let markdown = latex
                 // Headers
-                .replace(/\\section\{(.*?)\}/g, "# $1") // Convert sections to Markdown headers
-                .replace(/\\subsection\{(.*?)\}/g, "## $1") // Convert subsections to Markdown headers
-                .replace(/\\subsubsection\{(.*?)\}/g, "### $1") // Convert subsubsections
+                .replace(/\\chapter\{(.*?)\}/g, '# $1\n')
+                .replace(/\\section\{(.*?)\}/g, '# $1\n')
+                .replace(/\\subsection\{(.*?)\}/g, '## $1\n')
+                .replace(/\\subsubsection\{(.*?)\}/g, '### $1\n')
+                .replace(/\\paragraph\{(.*?)\}/g, '#### $1\n')
+
+                // Text formatting
+                .replace(/\\textbf\{(.*?)\}/g, '**$1**')
+                .replace(/\\textit\{(.*?)\}/g, '*$1*')
+                .replace(/\\emph\{(.*?)\}/g, '*$1*')
+                .replace(/\\underline\{(.*?)\}/g, '_$1_')
 
                 // Lists
-                .replace(/\\begin\{itemize\}/g, "") // Remove itemize environment start
-                .replace(/\\end\{itemize\}/g, "")   // Remove itemize environment end
-                .replace(/\\item\s/g, "- ")         // Convert items to Markdown list items
-                .replace(/\\begin\{enumerate\}/g, "") // Remove enumerate environment start
-                .replace(/\\end\{enumerate\}/g, "")   // Remove enumerate environment end
+                .replace(/\\begin\{itemize\}/g, '')
+                .replace(/\\end\{itemize\}/g, '')
+                .replace(/\\begin\{enumerate\}/g, '')
+                .replace(/\\end\{enumerate\}/g, '')
+                .replace(/\\item\s+(.*?)(?=\\item|\\end\{|$)/g, '- $1\n')
 
-                // Inline math
-                .replace(/\\\(([\s\S]*?)\\\)/g, "`$1`") // Inline math
-                .replace(/\\\[([\s\S]*?)\\\]/g, "`$1`") // Inline math
+                // Links and references
+                .replace(/\\href\{(.*?)\}\{(.*?)\}/g, '[$2]($1)')
+                .replace(/\\url\{(.*?)\}/g, '<$1>')
+                .replace(/\\cite\{(.*?)\}/g, '[@$1]')
 
-                // Block math
-                .replace(/\\begin\{equation\}([\s\S]*?)\\end\{equation\}/g, "```\n$1\n```") // Block math
-                .replace(/\\begin\{align\}([\s\S]*?)\\end\{align\}/g, "```\n$1\n```") // Align environment
+                // Math mode
+                .replace(/\$\$(.*?)\$\$/g, '\n```math\n$1\n```\n')
+                .replace(/\$(.*?)\$/g, '`$1`')
+                .replace(/\\begin\{equation\}([\s\S]*?)\\end\{equation\}/g, '\n```math\n$1\n```\n')
+                .replace(/\\begin\{align\*?\}([\s\S]*?)\\end\{align\*?\}/g, '\n```math\n$1\n```\n')
 
                 // Tables
-                .replace(/\\begin\{tabular\}([\s\S]*?)\\end\{tabular\}/g, (match, content) => {
-                    // Convert tabular to Markdown table
-                    const rows = content.trim().split("\\\\");
+                .replace(/\\begin\{tabular\}(\{.*?\})([\s\S]*?)\\end\{tabular\}/g, (match, columns, content) => {
+                    const rows = content.trim().split('\\\\');
                     const table = rows.map(row => {
-                        return "| " + row.trim().split("&").map(cell => cell.trim()).join(" | ") + " |";
+                        return '| ' + row.trim().split('&').map(cell => cell.trim()).join(' | ') + ' |';
                     });
-                    const headerSeparator = "| " + rows[0].trim().split("&").map(() => "---").join(" | ") + " |";
-                    return [table[0], headerSeparator, ...table.slice(1)].join("\n");
+                    const headerSeparator = '| ' + columns.replace(/[^c|l|r]/g, '').split('').map(() => '---').join(' | ') + ' |';
+                    return '\n' + table[0] + '\n' + headerSeparator + '\n' + table.slice(1).join('\n') + '\n';
                 })
 
-                // Figures
-                .replace(/\\includegraphics\[.*?\]\{(.*?)\}/g, "![]($1)") // Convert images
-                .replace(/\\caption\{(.*?)\}/g, "<figcaption>$1</figcaption>") // Convert captions
+                // Figures and images
+                .replace(/\\includegraphics(\[.*?\])?\{(.*?)\}/g, '![]($2)')
+                .replace(/\\caption\{(.*?)\}/g, '*$1*')
 
-                // Citations
-                .replace(/\\cite\{(.*?)\}/g, "[@$1]") // Convert citations
-                .replace(/\\bibliography\{(.*?)\}/g, "References: $1"); // Convert bibliography
+                // Clean up
+                .replace(/\\newline/g, '\n')
+                .replace(/\\\\(\n)?/g, '\n')
+                .replace(/\n\n+/g, '\n\n')
+                .trim();
+
+            // Combine all elements
+            markdown = title + author + date + markdown;
 
             // Display the converted Markdown
             document.getElementById("markdownOutput").innerText = markdown || "Conversion failed";
