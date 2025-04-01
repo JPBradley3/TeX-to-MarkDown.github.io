@@ -5,20 +5,216 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LaTeX to Markdown Converter</title>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; margin: 20px; }
-        textarea { width: 80%; height: 150px; margin-bottom: 10px; }
-        button { padding: 10px; cursor: pointer; }
-        pre { background: #f4f4f4; padding: 10px; width: 80%; margin: auto; text-align: left; }
+        :root {
+            --primary-color: #2196F3;
+            --background-color: #f8f9fa;
+            --border-color: #e9ecef;
+            --text-color: #212529;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--background-color);
+            min-height: 100vh;
+        }
+
+        .header {
+            background-color: white;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .container {
+            display: flex;
+            padding-top: 80px;
+            height: calc(100vh - 80px);
+        }
+
+        .editor-pane {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 1rem;
+            background-color: white;
+            margin: 0.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .pane-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .pane-title {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: var(--text-color);
+        }
+
+        .editor {
+            flex: 1;
+            width: 100%;
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            resize: none;
+            background-color: #fafafa;
+        }
+
+        .editor:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.1);
+        }
+
+        .button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background-color 0.2s;
+        }
+
+        .button:hover {
+            background-color: #1976D2;
+        }
+
+        .button-secondary {
+            background-color: transparent;
+            color: var(--primary-color);
+            border: 1px solid var(--primary-color);
+            margin-left: 0.5rem;
+        }
+
+        .button-secondary:hover {
+            background-color: rgba(33, 150, 243, 0.1);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .editor-pane {
+                margin: 0.5rem;
+                height: calc(50vh - 60px);
+            }
+        }
+
+        /* Theme toggle */
+        .theme-switch {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+        }
+
+        /* Dark theme */
+        [data-theme="dark"] {
+            --background-color: #1a1a1a;
+            --text-color: #ffffff;
+            --border-color: #333333;
+        }
+
+        [data-theme="dark"] .editor-pane {
+            background-color: #2d2d2d;
+        }
+
+        [data-theme="dark"] .editor {
+            background-color: #1a1a1a;
+            color: #ffffff;
+        }
+
+        [data-theme="dark"] .header {
+            background-color: #2d2d2d;
+        }
     </style>
 </head>
 <body>
-    <h2>LaTeX to Markdown Converter</h2>
-    <textarea id="latexInput" placeholder="Enter LaTeX code here..."></textarea><br>
-    <button onclick="convert()">Convert</button>
-    <h3>Markdown Output:</h3>
-    <pre id="markdownOutput"></pre>
+    <div class="header">
+        <h1>LaTeX to Markdown Converter</h1>
+        <button class="button button-secondary theme-switch" onclick="toggleTheme()">Toggle Theme</button>
+    </div>
+
+    <div class="container">
+        <div class="editor-pane">
+            <div class="pane-header">
+                <span class="pane-title">LaTeX Input</span>
+                <button class="button button-secondary" onclick="clearInput()">Clear</button>
+            </div>
+            <textarea id="latexInput" class="editor" placeholder="Enter LaTeX code here..."></textarea>
+        </div>
+
+        <div class="editor-pane">
+            <div class="pane-header">
+                <span class="pane-title">Markdown Output</span>
+                <div>
+                    <button class="button" onclick="convert()">Convert</button>
+                    <button class="button button-secondary" onclick="copyOutput()">Copy</button>
+                </div>
+            </div>
+            <textarea id="markdownOutput" class="editor" readonly placeholder="Converted Markdown will appear here..."></textarea>
+        </div>
+    </div>
 
     <script>
+        // Keep your existing convert() function here
+
+        function clearInput() {
+            document.getElementById("latexInput").value = "";
+            document.getElementById("markdownOutput").value = "";
+        }
+
+        function copyOutput() {
+            const output = document.getElementById("markdownOutput");
+            output.select();
+            document.execCommand("copy");
+            
+            // Visual feedback
+            const copyButton = event.target;
+            const originalText = copyButton.textContent;
+            copyButton.textContent = "Copied!";
+            setTimeout(() => {
+                copyButton.textContent = originalText;
+            }, 2000);
+        }
+
+        function toggleTheme() {
+            const body = document.body;
+            const currentTheme = body.getAttribute("data-theme");
+            if (currentTheme === "dark") {
+                body.removeAttribute("data-theme");
+            } else {
+                body.setAttribute("data-theme", "dark");
+            }
+        }
+        
         function convert() {
             let latex = document.getElementById("latexInput").value;
 
