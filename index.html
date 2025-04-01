@@ -83,6 +83,9 @@
             line-height: 1.5;
             resize: none;
             background-color: #fafafa;
+            white-space: pre-wrap;
+            overflow-wrap: break-word;
+            overflow-y: auto;
         }
 
         .editor:focus {
@@ -128,14 +131,6 @@
             }
         }
 
-        /* Theme toggle */
-        .theme-switch {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-        }
-
-        /* Dark theme */
         [data-theme="dark"] {
             --background-color: #1a1a1a;
             --text-color: #ffffff;
@@ -159,7 +154,7 @@
 <body>
     <div class="header">
         <h1>LaTeX to Markdown Converter</h1>
-        <button class="button button-secondary theme-switch" onclick="toggleTheme()">Toggle Theme</button>
+        <button class="button button-secondary" onclick="toggleTheme()">Toggle Theme</button>
     </div>
 
     <div class="container">
@@ -184,37 +179,6 @@
     </div>
 
     <script>
-        // Keep your existing convert() function here
-
-        function clearInput() {
-            document.getElementById("latexInput").value = "";
-            document.getElementById("markdownOutput").value = "";
-        }
-
-        function copyOutput() {
-            const output = document.getElementById("markdownOutput");
-            output.select();
-            document.execCommand("copy");
-            
-            // Visual feedback
-            const copyButton = event.target;
-            const originalText = copyButton.textContent;
-            copyButton.textContent = "Copied!";
-            setTimeout(() => {
-                copyButton.textContent = originalText;
-            }, 2000);
-        }
-
-        function toggleTheme() {
-            const body = document.body;
-            const currentTheme = body.getAttribute("data-theme");
-            if (currentTheme === "dark") {
-                body.removeAttribute("data-theme");
-            } else {
-                body.setAttribute("data-theme", "dark");
-            }
-        }
-
         function convert() {
             let latex = document.getElementById("latexInput").value;
 
@@ -314,9 +278,34 @@
             document.getElementById("markdownOutput").innerText = markdown || "Conversion failed";
         }
 
+        function clearInput() {
+            document.getElementById("latexInput").value = "";
+            document.getElementById("markdownOutput").value = "";
+        }
 
+        function copyOutput() {
+            const output = document.getElementById("markdownOutput");
+            output.select();
+            document.execCommand("copy");
+            
+            // Visual feedback
+            const copyButton = event.target;
+            const originalText = copyButton.textContent;
+            copyButton.textContent = "Copied!";
+            setTimeout(() => {
+                copyButton.textContent = originalText;
+            }, 2000);
+        }
 
-
+        function toggleTheme() {
+            const body = document.body;
+            const currentTheme = body.getAttribute("data-theme");
+            if (currentTheme === "dark") {
+                body.removeAttribute("data-theme");
+            } else {
+                body.setAttribute("data-theme", "dark");
+            }
+        }
     </script>
 </body>
 </html>
