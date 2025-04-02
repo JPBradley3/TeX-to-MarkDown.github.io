@@ -1,135 +1,25 @@
-# LaTeX to Markdown Converter
+# Cyclist Weather App 
 
-*Modern Web Application Documentation*
+# IntroductionThe **Cyclist Weather App** is designed to provide real-time weather updates tailored for cyclists, ensuring safer and more efficient rides. The application integrates weather APIs and mapping technologies to offer location-based forecasts and route suggestions.# Features- **Real-time Weather Data**: Fetches up-to-date temperature, precipitation, and wind conditions.
 
-*\today*
+- **Cyclist-Specific Insights**: Provides recommendations based on road conditions, visibility, and temperature comfort levels.
 
-# OverviewThe LaTeX to Markdown Converter is a modern, browser-based application featuring a sleek split-pane interface for seamless document conversion. This tool provides real-time conversion of LaTeX content to Markdown format, with an emphasis on user experience and accessibility.# User Interface## LayoutThe application features a modern split-pane design with:- Fixed header with application title
+- **Interactive Map**: Displays optimal cycling routes using *Leaflet.js* and integrated weather overlays.
 
-- Left pane for LaTeX input
+- **Custom Alerts**: Notifies users of extreme weather changes.# InstallationTo set up the application locally, follow these steps:## PrerequisitesEnsure you have the following installed:- **Python 3.x**: Available at <https://www.python.org/>.
 
-- Right pane for Markdown output
+- **pip**: Python's package manager.
 
-- Theme toggle for dark/light mode## ControlsThe interface includes several control elements:- **Convert Button:** Processes the LaTeX input
+- **Git**: Install from <https://git-scm.com/>.## Setup Steps1. Clone the repository:``` git clone https://github.com/yourusername/cyclist-weather-app.git cd cyclist-weather-app ```2. Install dependencies:``` pip install -r requirements.txt ```3. Run the application:``` python app.py ```4. Open the application in your browser and start exploring!# Usage1. Open the web interface in your browser.
 
-- **Clear Button:** Resets the input field
+2. Enter your location or allow GPS access for real-time updates.
 
-- **Copy Button:** Copies output to clipboard
+3. Explore the interactive map to visualize optimal cycling routes.# Technology Stack- **Frontend**: HTML, CSS, JavaScript, Leaflet.js
 
-- **Theme Switch:** Toggles between light and dark modes# Features## Core Functionality- Real-time conversion
+- **Backend**: Python, Flask
 
-- Split-pane editing interface
+- **Data Sources**: OpenWeather API, Mapbox API# ContributingContributions are welcome! Please follow these steps to submit a pull request:1. Fork the repository.
 
-- Dark/Light theme support
+2. Create a new feature branch.
 
-- Responsive design for mobile devices
-
-- Clipboard integration## Conversion CapabilitiesThe converter supports:- Document metadata \begin{itemize}
-
-- Title
-
-- Author
-
-- Date
-
-- Document structure- Sections
-
-- Subsections
-
-- Subsubsections
-
-- Text formatting- **Bold** text
-
-- *Italic* text
-
-- `Monospace` text
-
-- *Emphasized* text
-
-- Lists- Unordered (itemize)
-
-- Ordered (enumerate)
-
-- Nested structures
-
-- Links and URLs
-
-- Code blocks (verbatim) \end{itemize}# Technical Implementation## Technologies Used- HTML5
-
-- CSS3 with Custom Properties
-
-- Vanilla JavaScript
-
-- Responsive Design Principles## Design Features- Modern color scheme
-
-- Flexible layout system
-
-- Accessibility considerations
-
-- Mobile-first approach# Usage Guide## Basic Operation1. Open the application in a modern web browser
-
-2. Paste or type LaTeX content in the left pane
-
-3. Click the "Convert" button
-
-4. View the Markdown output in the right pane
-
-5. Use the "Copy" button to copy the result## Theme Switching1. Locate the theme toggle button in the header
-
-2. Click to switch between light and dark modes
-
-3. Theme preference persists across sessions# Development## File Structure``` project/ ├── index.html    # Contains HTML, CSS, and JavaScript └── README.md     # Project documentation ```## StylingThe application uses CSS custom properties for:- Color schemes
-
-- Typography
-
-- Layout dimensions
-
-- Transitions# Browser CompatibilitySupported browsers include:- Chrome (latest)
-
-- Firefox (latest)
-
-- Safari (latest)
-
-- Edge (latest)# Known Limitations- Complex mathematical expressions require manual adjustment
-
-- Some specialized LaTeX environments not supported
-
-- Table formatting may need manual refinement
-
-- Image handling requires external hosting# Future EnhancementsPlanned improvements include:- Real-time preview updates
-
-- Enhanced math support
-
-- Custom LaTeX command definitions
-
-- Export options for different formats
-
-- Local storage for session persistence
-
-- Keyboard shortcuts# AccessibilityThe application includes:- Keyboard navigation support
-
-- High contrast theme options
-
-- Screen reader compatibility
-
-- Responsive text sizing
-
-- Focus management# ContributingTo contribute to development:1. Fork the repository
-
-2. Create a feature branch
-
-3. Implement improvements
-
-4. Submit a pull request# LicenseThis project is released under the MIT License, allowing for:- Commercial use
-
-- Modification
-
-- Distribution
-
-- Private use# SupportFor assistance:- Submit issues via repository
-
-- Contact maintainers
-
-- Check documentation
-
-- Join community discussions
+3. Commit changes and submit a pull request.# LicenseThis project is licensed under the MIT License. See `LICENSE` for more details.# ContactFor any inquiries, please reach out via email or open an issue on GitHub: <https://github.com/yourusername/cyclist-weather-app>
