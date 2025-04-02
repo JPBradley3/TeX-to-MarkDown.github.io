@@ -297,13 +297,18 @@
                 .replace(/\n{3,}/g, '\n\n')        // Reduce multiple blank lines to double
                 .replace(/^\s+|\s+$/gm, '')        // Trim whitespace from line starts/ends
                 .replace(/\n\s+\n/g, '\n\n')       // Replace lines with only whitespace
-                
+
                 // Preserve line breaks for specific patterns
                 .replace(/([^.\n])\n(?=[A-Z])/g, '$1\n\n')  // Add extra newline before capital letters
                 .replace(/([.!?])\s*\n/g, '$1\n\n')         // Add extra newline after sentence endings
                 .replace(/\n([-\d#>*])/g, '\n\n$1')         // Add extra newline before list items and headers
                 .replace(/([^-\d#>*\n])\n([^-\d#>*\n])/g, '$1 $2')  // Join normal text lines
-                
+
+                // **NEW: Add extra newlines before numbers and backticks**
+                .replace(/(\n|^)(\d+\.)/g, '$1\n\n$2') // Add extra newline before numbered lists outside of environments
+                .replace(/(\n|^)(`)/g, '$1\n\n$2') // Add extra newline before backticks outside of environments
+                .replace(/(\n|^)(```)/g, '$1\n\n$2') // Add extra newline before code blocks outside of environments
+
                 // Final cleanup
                 .replace(/\n{3,}/g, '\n\n')        // Clean up any triple+ newlines
                 .trim();                           // Trim the final result
