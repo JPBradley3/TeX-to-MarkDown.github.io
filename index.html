@@ -259,7 +259,7 @@
                         .map(item => item.trim())
                         .map(item => '- ' + item)
                         .join('\n');
-                    return '\n\n' + items + '\n\n';
+                    return '\n' + items + '\n\n'; // Reduced to one \n before
                 })
                 .replace(/\\begin\{enumerate\}([\s\S]*?)\\end\{enumerate\}/g, (match, content) => {
                     const items = content.split('\\item')
@@ -267,7 +267,7 @@
                         .map(item => item.trim())
                         .map((item, index) => `${index + 1}. ${item}`)
                         .join('\n');
-                    return '\n\n' + items + '\n\n';
+                    return '\n' + items + '\n\n'; // Reduced to one \n before
                 })
 
                 // Text formatting
@@ -286,20 +286,17 @@
 
                 // URLs and links
                 .replace(/\\url\{([^}]+)\}/g, '<$1>')
-                .replace(/\\href\{([^}]+)\}\{([^}]+)\}/g, '[$2]($1)')
+                .replace(/\\href\{([^}]+)\}\{([^}]+)\}/g, '$2')
 
                 // Handle LaTeX environments
                 .replace(/\\begin\{(.*?)\}([\s\S]*?)\\end\{\1\}/g, (match, env, content) => {
-                    return '\n\n' + content.trim() + '\n\n';
+                    return '\n' + content.trim() + '\n\n'; // Reduced to one \n before
                 })
 
                 // Cleanup and spacing fixes
                 .replace(/\n{3,}/g, '\n\n')        // Reduce multiple blank lines to double
                 .replace(/^\s+|\s+$/gm, '')        // Trim whitespace from line starts/ends
                 .replace(/\n\s+\n/g, '\n\n')       // Replace lines with only whitespace
-                .split('\n')                       // Split into lines
-                .map(line => line.trim())          // Trim each line
-                .join('\n')                        // Rejoin with single newlines
                 
                 // Preserve line breaks for specific patterns
                 .replace(/([^.\n])\n(?=[A-Z])/g, '$1\n\n')  // Add extra newline before capital letters
@@ -329,6 +326,7 @@
             // Display the converted Markdown
             document.getElementById("markdownOutput").value = markdown || "Conversion failed";
         }
+
 
 
         async function copyOutput() {
