@@ -309,6 +309,10 @@
                 .replace(/(\n|^)(`)/g, '$1\n\n$2') // Add extra newline before backticks outside of environments
                 .replace(/(\n|^)(```)/g, '$1\n\n$2') // Add extra newline before code blocks outside of environments
 
+                // **NEW: Add extra newlines after list items and before headers**
+                .replace(/(\n- )(.*?)(\n(?=[#\d]))/g, '$1$2\n\n') // Add extra newline after list items before headers or numbers
+                .replace(/(\n\d+\. )(.*?)(\n(?=[#\d]))/g, '$1$2\n\n') // Add extra newline after numbered list items before headers or numbers
+
                 // Final cleanup
                 .replace(/\n{3,}/g, '\n\n')        // Clean up any triple+ newlines
                 .trim();                           // Trim the final result
@@ -331,6 +335,7 @@
             // Display the converted Markdown
             document.getElementById("markdownOutput").value = markdown || "Conversion failed";
         }
+
 
 
 
