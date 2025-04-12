@@ -1,4 +1,3 @@
-
 # README: LaTeX to Markdown Converter (\code{index.html
 
 *Generated Description (Based on file content)*
@@ -7,7 +6,7 @@
 
 )}
 
-*This document provides an overview of the `index.html` file, a self-contained web page that functions as a client-side LaTeX to Markdown converter. It details the purpose, features, usage instructions, code structure, and known limitations of the tool.*
+*This document provides an overview of the `index.html` file, a self-contained web page that functions as a client-side LaTeX to Markdown converter. It details the purpose, features, installation, usage instructions, code structure, and known limitations of the tool.*
 
 ## Purpose
 
@@ -77,18 +76,35 @@ _` to their literal characters.
 \item **Self-Contained:** All necessary HTML structure, CSS styling (including responsive design and themes), and JavaScript logic are embedded within the single `index.html` file.
 \end{itemize}
 
+## Installation
+
+This LaTeX to Markdown converter is provided as a single, self-contained HTML file (`index.html`). No complex installation or server setup is required. Follow these simple steps:
+
+1. **Obtain the File:**
+
+Download or save the `index.html` file to your local computer. Choose a location you can easily access, such as your Desktop or Documents folder.
+2. **Locate the File:**
+
+Open your computer's file explorer (e.g., Windows File Explorer, macOS Finder).
+Navigate to the folder where you saved `index.html`.
+3. **Open in Browser:** Choose one of the following methods:
+
+- **Method A (Easiest):** Double-click the `index.html` file. It should automatically open in your default web browser.
+
+- **Method B (Alternative):**
+
+That's it! The converter tool will load in your browser, and you can start using it immediately. No internet connection is needed after the page has loaded.
+
 ## Usage
 
-To use the LaTeX to Markdown converter:
+To use the LaTeX to Markdown converter after opening it:
 
-1. Save the `index.html` file to your local machine.
-2. Open the `index.html` file using a modern web browser (e.g., Google Chrome, Mozilla Firefox, Microsoft Edge, Safari). No internet connection is required after loading the file.
-3. Paste your LaTeX code into the "LaTeX Input" text area on the left.
-4. Click the **Convert** button.
-5. The converted Markdown will appear in the "Markdown Output" text area on the right. If an error occurs, a message will be shown here. Check the browser's developer console for more details if needed.
-6. Click the **Copy** button to copy the Markdown output to your clipboard.
-7. Use the **Clear** button to start a new conversion.
-8. Use the **Toggle Theme** button to change the appearance.
+1. Paste your LaTeX code into the "LaTeX Input" text area on the left.
+2. Click the **Convert** button.
+3. The converted Markdown will appear in the "Markdown Output" text area on the right. If an error occurs, a message will be shown here. Check the browser's developer console for more details if needed.
+4. Click the **Copy** button to copy the Markdown output to your clipboard.
+5. Use the **Clear** button to start a new conversion.
+6. Use the **Toggle Theme** button to change the appearance.
 
 ## Dependencies
 
