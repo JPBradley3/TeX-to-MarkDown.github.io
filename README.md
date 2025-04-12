@@ -1,10 +1,8 @@
-# README: LaTeX to Markdown Converter (\code{index.html
+# README: LaTeX to Markdown Converter 
 
 *Generated Description (Based on file content)*
 
 *April 12, 2025*
-
-)}
 
 *This document provides an overview of the `index.html` file, a self-contained web page that functions as a client-side LaTeX to Markdown converter. It details the purpose, features, installation, usage instructions, code structure, and known limitations of the tool.*
 
@@ -25,7 +23,6 @@ The converter, implemented using HTML, CSS, and JavaScript within `index.html`, 
 - **Conversion Functionality:** A **Convert** button triggers the JavaScript conversion logic.
 
 - **Supported LaTeX Elements:** The conversion script (`convert()` function) attempts to handle:
-\begin{itemize}
 
 - **Metadata:** `
 title`, `
@@ -38,37 +35,11 @@ date` (including processing `\April 12, 2025` and handling `
 
 - **Environments:**
 
-\begin{itemize}
-
 - `abstract`: Converts content to a single italicized paragraph. Handles empty abstract.
 
 - `verbatim`: Converts content to Markdown fenced code blocks (````...````), preserving internal content literally (protected during conversion).
 
 - `itemize`, `enumerate`: Converts to Markdown lists (`-` or `1.`). Attempts to remove nested list environments within these blocks using a single-pass replacement.
-
-\begin{itemize}
-\item **Sectioning:** `
-section`, `
-subsection`, `
-subsubsection` (including starred versions like `
-section*`).
-\item **Text Formatting:** `
-textbf`, `
-textit`, `
-texttt`, `
-code`, `
-emph`. Supports multi-line content within braces for these commands.
-\item **Links:** `
-url` (to `<...>`) and `
-href` (extracts link text).
-\item **Line Breaks:** Converts `
-` to Markdown newlines.
-\item **Escaped Characters:** Unescapes `
-%`, `
-&`, `
-#`, `
-_` to their literal characters.
-\end{itemize}
 
 - Sectioning: `\section`, `\subsection`, `\subsubsection` (including starred versions like `\section*`).
 
@@ -77,7 +48,8 @@ _` to their literal characters.
 - Links: `\url` (to `<...>`) and `\href` (extracts link text).
 
 - Line Breaks: Converts `
-` to Markdown newlines.
+  
+- ` to Markdown newlines.
 
 - Escaped Characters: Unescapes `%`, `&`, `#`, `_` to their literal characters.
 
@@ -138,7 +110,6 @@ The `index.html` file is structured as follows:
 - **CSS (`<style>** in \code{<head>`):} Contains all styling rules for layout, appearance, responsiveness, and theme variables (light and dark modes).
 
 - **JavaScript (`<script>** at end of \code{<body>`):} Includes functions for:
-\begin{itemize}
 
 - `convert()`: The core logic performing LaTeX-to-Markdown text replacements using regular expressions, including verbatim protection, comment removal, metadata extraction, environment/command conversion, and cleanup. Includes basic error handling.
 
@@ -150,7 +121,7 @@ The `index.html` file is structured as follows:
 
 - An event listener on `DOMContentLoaded` to apply the saved theme on page load.
 
-\end{itemize}
+
 
 ## Limitations
 
