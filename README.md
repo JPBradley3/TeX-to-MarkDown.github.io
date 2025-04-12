@@ -68,14 +68,31 @@ href` (extracts link text).
 #`, `
 _` to their literal characters.
 \end{itemize}
-\item **Whitespace Management:** Attempts to preserve paragraph breaks (double newlines) and ensure appropriate spacing around Markdown block elements. Trims leading/trailing whitespace from lines.
-\item **Copy to Clipboard:** A **Copy** button allows easy copying of the generated Markdown output (uses async Clipboard API with fallback).
-\item **Clear Input:** A **Clear** button resets both the input and output panes.
-\item **Theme Toggling:** A **Toggle Theme** button switches between light and dark modes. Theme preference is saved in browser local storage.
-\item **Error Handling:** Includes a basic `try...catch` block around the conversion logic to prevent total browser freeze on unexpected errors and display a message in the output pane.
-\item **HTML Entity Decoding:** Includes a final safety-net step to decode `<` and `>` back to `<` and `>`.
-\item **Self-Contained:** All necessary HTML structure, CSS styling (including responsive design and themes), and JavaScript logic are embedded within the single `index.html` file.
-\end{itemize}
+
+- Sectioning: `\section`, `\subsection`, `\subsubsection` (including starred versions like `\section*`).
+
+- Text Formatting: `\textbf`, `\textit`, `\texttt`, `\code`, `\emph`. Supports multi-line content within braces for these commands.
+
+- Links: `\url` (to `<...>`) and `\href` (extracts link text).
+
+- Line Breaks: Converts `
+` to Markdown newlines.
+
+- Escaped Characters: Unescapes `%`, `&`, `#`, `_` to their literal characters.
+
+- Whitespace Management: Attempts to preserve paragraph breaks (double newlines) and ensure appropriate spacing around Markdown block elements. Trims leading/trailing whitespace from lines.
+
+- Copy to Clipboard: A Copy button allows easy copying of the generated Markdown output (uses async Clipboard API with fallback).
+
+- Clear Input: A Clear button resets both the input and output panes.
+
+- Theme Toggling: A Toggle Theme button switches between light and dark modes. Theme preference is saved in browser local storage.
+
+- Error Handling: Includes a basic try...catch block around the conversion logic to prevent total browser freeze on unexpected errors and display a message in the output pane.
+
+- HTML Entity Decoding: Includes a final safety-net step to decode `<` and `>` back to `<` and `>`.
+
+- Self-Contained: All necessary HTML structure, CSS styling (including responsive design and themes), and JavaScript logic are embedded within the single index.html file.
 
 ## Installation
 
