@@ -46,6 +46,7 @@ date` (including processing `\April 12, 2025` and handling `
 
 - `itemize`, `enumerate`: Converts to Markdown lists (`-` or `1.`). Attempts to remove nested list environments within these blocks using a single-pass replacement.
 
+\begin{itemize}
 \item **Sectioning:** `
 section`, `
 subsection`, `
