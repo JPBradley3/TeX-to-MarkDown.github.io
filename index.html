@@ -248,9 +248,9 @@
 
             let markdown = latex
                 // Headers with proper spacing
-                .replace(/\\section\{(.*?)\}/g, '\n\n# $1\n\n')
-                .replace(/\\subsection\{(.*?)\}/g, '\n\n## $1\n\n')
-                .replace(/\\subsubsection\{(.*?)\}/g, '\n\n### $1\n\n')
+                .replace(/\\section\{(.*?)\}/g, '\n\n## $1\n\n')
+                .replace(/\\subsection\{(.*?)\}/g, '\n\n### $1\n\n')
+                .replace(/\\subsubsection\{(.*?)\}/g, '\n\n#### $1\n\n')
 
                 // Improved list handling with proper spacing
                 .replace(/\\begin\{itemize\}([\s\S]*?)\\end\{itemize\}/g, (match, content) => {
@@ -259,7 +259,7 @@
                         .map(item => item.trim())
                         .map(item => '- ' + item)
                         .join('\n');
-                    return '\n' + items + '\n\n'; // Reduced to one \n before
+                    return '\n' + items + '\n\n';
                 })
                 .replace(/\\begin\{enumerate\}([\s\S]*?)\\end\{enumerate\}/g, (match, content) => {
                     const items = content.split('\\item')
@@ -267,7 +267,7 @@
                         .map(item => item.trim())
                         .map((item, index) => `${index + 1}. ${item}`)
                         .join('\n');
-                    return '\n' + items + '\n\n'; // Reduced to one \n before
+                    return '\n' + items + '\n\n';
                 })
 
                 // Text formatting
@@ -286,11 +286,11 @@
 
                 // URLs and links
                 .replace(/\\url\{([^}]+)\}/g, '<$1>')
-                .replace(/\\href\{([^}]+)\}\{([^}]+)\}/g, '$2')
+                .replace(/\\href\{([^}]+)\}\{([^}]+)\}/g, '[$2]($1)')
 
                 // Handle LaTeX environments
                 .replace(/\\begin\{(.*?)\}([\s\S]*?)\\end\{\1\}/g, (match, env, content) => {
-                    return '\n' + content.trim() + '\n\n'; // Reduced to one \n before
+                    return '\n' + content.trim() + '\n\n';
                 })
 
                 // Cleanup and spacing fixes
@@ -304,12 +304,12 @@
                 .replace(/\n([-\d#>*])/g, '\n\n$1')         // Add extra newline before list items and headers
                 .replace(/([^-\d#>*\n])\n([^-\d#>*\n])/g, '$1 $2')  // Join normal text lines
 
-                // **NEW: Add extra newlines before numbers and backticks**
+                // Add extra newlines before numbers and backticks
                 .replace(/(\n|^)(\d+\.)/g, '$1\n\n$2') // Add extra newline before numbered lists outside of environments
                 .replace(/(\n|^)(`)/g, '$1\n\n$2') // Add extra newline before backticks outside of environments
                 .replace(/(\n|^)(```)/g, '$1\n\n$2') // Add extra newline before code blocks outside of environments
 
-                // **NEW: Add extra newlines after list items and before headers**
+                // Add extra newlines after list items and before headers
                 .replace(/(\n- )(.*?)(\n(?=[#\d]))/g, '$1$2\n\n') // Add extra newline after list items before headers or numbers
                 .replace(/(\n\d+\. )(.*?)(\n(?=[#\d]))/g, '$1$2\n\n') // Add extra newline after numbered list items before headers or numbers
 
@@ -335,9 +335,6 @@
             // Display the converted Markdown
             document.getElementById("markdownOutput").value = markdown || "Conversion failed";
         }
-
-
-
 
         async function copyOutput() {
             const output = document.getElementById("markdownOutput").value;
