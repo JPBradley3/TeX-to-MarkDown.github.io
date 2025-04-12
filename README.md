@@ -44,7 +44,7 @@ date` (including processing `\April 12, 2025` and handling `
 
 - `verbatim`: Converts content to Markdown fenced code blocks (````...````), preserving internal content literally (protected during conversion).
 
-- `itemize`, `enumerate`: Converts to Markdown lists (`-` or `1.`). Attempts to remove nested list environments within these blocks (includes a safety break to prevent browser freezing on complex/malformed input).
+- `itemize`, `enumerate`: Converts to Markdown lists (`-` or `1.`). Attempts to remove nested list environments within these blocks using a single-pass replacement.
 
 \item **Sectioning:** `
 section`, `
@@ -73,6 +73,7 @@ _` to their literal characters.
 \item **Clear Input:** A **Clear** button resets both the input and output panes.
 \item **Theme Toggling:** A **Toggle Theme** button switches between light and dark modes. Theme preference is saved in browser local storage.
 \item **Error Handling:** Includes a basic `try...catch` block around the conversion logic to prevent total browser freeze on unexpected errors and display a message in the output pane.
+\item **HTML Entity Decoding:** Includes a final safety-net step to decode `<` and `>` back to `<` and `>`.
 \item **Self-Contained:** All necessary HTML structure, CSS styling (including responsive design and themes), and JavaScript logic are embedded within the single `index.html` file.
 \end{itemize}
 
