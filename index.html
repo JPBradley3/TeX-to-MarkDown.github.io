@@ -47,10 +47,10 @@
 
         .container {
             display: flex;
-            padding-top: 80px;
-            height: calc(100vh - 80px);
+            padding-top: 80px; /* Match header height + gap */
+            height: calc(100vh - 80px); /* Adjust height calculation */
             gap: 1rem;
-            padding: 80px 1rem 1rem 1rem;
+            padding: 80px 1rem 1rem 1rem; /* Add padding around */
         }
 
         .editor-pane {
@@ -61,14 +61,16 @@
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
             min-width: 0; /* Prevents flex item overflow */
+            overflow: hidden; /* Prevent content spillover */
         }
 
         .pane-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 1rem;
+            padding: 0.75rem 1rem; /* Slightly reduced padding */
             border-bottom: 1px solid var(--border-color);
+            flex-shrink: 0; /* Prevent header from shrinking */
         }
 
         .pane-title {
@@ -78,7 +80,7 @@
         }
 
         .editor {
-            flex: 1;
+            flex: 1; /* Allow editor to grow */
             width: 100%;
             padding: 1rem;
             border: none;
@@ -89,7 +91,8 @@
             background-color: #fafafa;
             white-space: pre-wrap;
             overflow-wrap: break-word;
-            overflow-y: auto;
+            overflow-y: auto; /* Ensure scrolling */
+            color: var(--text-color); /* Ensure text color applies */
         }
 
         .editor:focus {
@@ -142,11 +145,13 @@
         @media (max-width: 768px) {
             .container {
                 flex-direction: column;
-                padding-top: 70px;
+                padding-top: 70px; /* Adjust for potentially smaller header */
+                height: calc(100vh - 70px); /* Adjust height */
             }
 
             .editor-pane {
-                height: calc(50vh - 60px);
+                 /* Let flexbox handle height distribution */
+                 min-height: 200px; /* Ensure minimum height */
             }
 
             .header {
@@ -158,32 +163,68 @@
             }
         }
 
+        /* Dark Theme */
         [data-theme="dark"] {
-            --background-color: #1a1a1a;
-            --text-color: #ffffff;
-            --border-color: #333333;
+            --primary-color: #64b5f6; /* Lighter blue for dark mode */
+            --background-color: #1e1e1e;
+            --text-color: #e0e0e0;
+            --border-color: #424242;
+            --pane-background: #2d2d2d;
+            --editor-background: #1a1a1a;
+            --editor-focus-background: #252525;
+            --button-secondary-hover-bg: rgba(100, 181, 246, 0.1);
+        }
+
+        [data-theme="dark"] body {
+            color: var(--text-color);
+            background-color: var(--background-color);
         }
 
         [data-theme="dark"] .editor-pane {
-            background-color: #2d2d2d;
+            background-color: var(--pane-background);
         }
 
         [data-theme="dark"] .editor {
-            background-color: #1a1a1a;
-            color: #ffffff;
+            background-color: var(--editor-background);
+            color: var(--text-color);
+        }
+
+        [data-theme="dark"] .editor:focus {
+            background-color: var(--editor-focus-background);
         }
 
         [data-theme="dark"] .header {
-            background-color: #2d2d2d;
+            background-color: var(--pane-background);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        [data-theme="dark"] .header h1 {
+             color: var(--primary-color);
+        }
+
+        [data-theme="dark"] .pane-header {
+             border-bottom: 1px solid var(--border-color);
+        }
+
+        [data-theme="dark"] .pane-title {
+            color: var(--text-color);
+        }
+
+        [data-theme="dark"] .button {
+            background-color: var(--primary-color);
+            color: #111; /* Darker text on lighter blue */
+        }
+        [data-theme="dark"] .button:hover {
+             background-color: #90caf9; /* Lighter blue on hover */
         }
 
         [data-theme="dark"] .button-secondary {
-            color: #ffffff;
-            border-color: #ffffff;
+            color: var(--primary-color);
+            border-color: var(--primary-color);
         }
 
         [data-theme="dark"] .button-secondary:hover {
-            background-color: rgba(255, 255, 255, 0.1);
+            background-color: var(--button-secondary-hover-bg);
         }
     </style>
 </head>
@@ -207,10 +248,10 @@
                 <span class="pane-title">Markdown Output</span>
                 <div class="button-group">
                     <button class="button" onclick="convert()">Convert</button>
-                    <button class="button button-secondary" onclick="copyOutput()">Copy</button>
+                    <button class="button button-secondary" onclick="copyOutput(event)">Copy</button> <!-- Pass event -->
                 </div>
             </div>
-            <textarea id="markdownOutput" class="editor" placeholder="Converted Markdown will appear here..." spellcheck="false"></textarea>
+            <textarea id="markdownOutput" class="editor" placeholder="Converted Markdown will appear here..." spellcheck="false" readonly></textarea> <!-- Added readonly -->
         </div>
     </div>
 
@@ -218,153 +259,163 @@
         function convert() {
             let latex = document.getElementById("latexInput").value;
 
+            // --- Handle \today globally first ---
+            // Simple date format, adjust as needed
+            const todayDate = new Date().toLocaleDateString(undefined, { // Use locale default
+                year: 'numeric', month: 'long', day: 'numeric'
+            });
+            latex = latex.replace(/\\today/g, todayDate); // Replace \today everywhere
+
             // Initialize title, author, and date variables
             let title = '', author = '', date = '';
 
-            // Extract title, author, and date if present
-            const titleMatch = latex.match(/\\title\{(.*?)\}/);
-            const authorMatch = latex.match(/\\author\{(.*?)\}/);
-            const dateMatch = latex.match(/\\date\{(.*?)\}/);
+            // Extract title, author, and date if present (trimming content)
+            // Use 's' flag for multiline content, make non-greedy '.*?'
+            const titleMatch = latex.match(/\\title\{(.*?)\}/s);
+            const authorMatch = latex.match(/\\author\{(.*?)\}/s);
+            const dateMatch = latex.match(/\\date\{(.*?)\}/s);
 
             if (titleMatch) {
-                title = `# ${titleMatch[1]}\n\n`;
-                latex = latex.replace(/\\title\{.*?\}/, '');
+                title = `# ${titleMatch[1].trim()}\n\n`;
+                latex = latex.replace(/\\title\{.*?\}/s, ''); // Remove the matched command
             }
             if (authorMatch) {
-                author = `*${authorMatch[1]}*\n\n`;
-                latex = latex.replace(/\\author\{.*?\}/, '');
+                author = `*${authorMatch[1].trim()}*\n\n`;
+                latex = latex.replace(/\\author\{.*?\}/s, ''); // Remove the matched command
             }
             if (dateMatch) {
-                date = `*${dateMatch[1]}*\n\n`;
-                latex = latex.replace(/\\date\{.*?\}/, '');
+                // Date content might have already been replaced if it was \today
+                date = `*${dateMatch[1].trim()}*\n\n`;
+                latex = latex.replace(/\\date\{.*?\}/s, ''); // Remove the matched command
             }
 
-            // Remove LaTeX document class and package declarations
-            latex = latex.replace(/\\documentclass.*?\n/g, '')
-                .replace(/\\usepackage.*?\n/g, '')
-                .replace(/\\begin\{document\}/g, '')
-                .replace(/\\end\{document\}/g, '')
-                .replace(/\\maketitle/g, '');
+            // Remove LaTeX document class, package declarations, and specific commands
+            latex = latex.replace(/\\documentclass.*?(\n|$)/g, '')
+                         .replace(/\\usepackage.*?(\n|$)/g, '')
+                         .replace(/\\begin\{document\}/g, '')
+                         .replace(/\\end\{document\}/g, '')
+                         .replace(/\\maketitle/g, '')
+                         .replace(/\\tableofcontents/g, ''); // Optional: remove TOC command
 
             let markdown = latex
-                // Headers with proper spacing
-                .replace(/\\section\{(.*?)\}/g, '\n\n## $1\n\n')
-                .replace(/\\subsection\{(.*?)\}/g, '\n\n### $1\n\n')
-                .replace(/\\subsubsection\{(.*?)\}/g, '\n\n#### $1\n\n')
+                // --- Abstract ---
+                .replace(/\\begin\{abstract\}([\s\S]*?)\\end\{abstract\}/g, (match, content) => {
+                    // Convert abstract content to an italicized block
+                    const processedContent = content.trim().replace(/\s*\n\s*/g, ' '); // Join lines
+                    return '\n\n*' + processedContent + '*\n\n';
+                })
 
-                // Improved list handling with proper spacing
+                // Headers - Ensure \n\n before and after
+                .replace(/\\section\*?\{(.*?)\}/g, '\n\n## $1\n\n')
+                .replace(/\\subsection\*?\{(.*?)\}/g, '\n\n### $1\n\n')
+                .replace(/\\subsubsection\*?\{(.*?)\}/g, '\n\n#### $1\n\n')
+
+                // Lists - Ensure \n\n before and after the entire list block
                 .replace(/\\begin\{itemize\}([\s\S]*?)\\end\{itemize\}/g, (match, content) => {
                     const items = content.split('\\item')
-                        .slice(1)
                         .map(item => item.trim())
-                        .map(item => '- ' + item)
+                        .filter(item => item) // Remove empty entries from split
+                        .map(item => '- ' + item.replace(/\\{2}\s*$/, '').trim()) // Handle trailing \\ and trim
                         .join('\n');
-                    return '\n' + items + '\n\n';
+                    return '\n\n' + items + '\n\n'; // Add \n\n before and after
                 })
                 .replace(/\\begin\{enumerate\}([\s\S]*?)\\end\{enumerate\}/g, (match, content) => {
+                    let counter = 1;
                     const items = content.split('\\item')
-                        .slice(1)
                         .map(item => item.trim())
-                        .map((item, index) => `${index + 1}. ${item}`)
+                        .filter(item => item) // Remove empty entries
+                        .map(item => `${counter++}. ${item.replace(/\\{2}\s*$/, '').trim()}`) // Handle trailing \\ and trim
                         .join('\n');
-                    return '\n' + items + '\n\n';
+                    return '\n\n' + items + '\n\n'; // Add \n\n before and after
                 })
 
                 // Text formatting
                 .replace(/\\textbf\{([^}]+)\}/g, '**$1**')
                 .replace(/\\textit\{([^}]+)\}/g, '*$1*')
                 .replace(/\\texttt\{([^}]+)\}/g, '`$1`')
-                .replace(/\\emph\{([^}]+)\}/g, '*$1*')
+                .replace(/\\emph\{([^}]+)\}/g, '*$1*') // Often same as italic
 
-                // Code blocks with proper spacing
+                // Code blocks (verbatim) - Ensure \n\n before and after
                 .replace(/\\begin\{verbatim\}([\s\S]*?)\\end\{verbatim\}/g, (match, content) => {
-                    return '\n\n```\n' + content.trim() + '\n```\n\n';
+                    const trimmedContent = content.replace(/^\n+|\n+$/g, '');
+                    return '\n\n```\n' + trimmedContent + '\n```\n\n';
                 })
 
-                // Simple items (outside environments) with proper spacing
-                .replace(/\\item\s+/g, '\n\n- ')
-
-                // URLs and links
+                // URLs and links (Corrected href to standard Markdown)
                 .replace(/\\url\{([^}]+)\}/g, '<$1>')
-                .replace(/\\href\{([^}]+)\}\{([^}]+)\}/g, '[$2]($1)')
+                .replace(/\\href\{([^}]+)\}\{([^}]+)\}/g, '$2') // Standard Markdown link text
 
-                // Handle LaTeX environments
-                .replace(/\\begin\{(.*?)\}([\s\S]*?)\\end\{\1\}/g, (match, env, content) => {
-                    return '\n' + content.trim() + '\n\n';
-                })
+                // Basic paragraph handling: Replace double newlines in LaTeX with double newlines in Markdown
+                .replace(/(\r\n|\r|\n)\s*(\r\n|\r|\n)/g, '\n\n')
 
-                // Cleanup and spacing fixes
-                .replace(/\n{3,}/g, '\n\n')        // Reduce multiple blank lines to double
-                .replace(/^\s+|\s+$/gm, '')        // Trim whitespace from line starts/ends
-                .replace(/\n\s+\n/g, '\n\n')       // Replace lines with only whitespace
+                // LaTeX line breaks and escaped chars
+                .replace(/\\{2}\s*/g, '\n') // Replace \\ with a newline (within paragraphs)
+                .replace(/\\\s+/g, ' ')     // Replace single \ followed by space with just a space
+                .replace(/\\%/g, '%')       // Unescape \% to %
+                .replace(/\\&/g, '&')       // Unescape \& to &
+                .replace(/\\#/g, '#')       // Unescape \# to #
+                .replace(/\\_/g, '_')       // Unescape \_ to _
+                // Add more escaped characters as needed
 
-                // Preserve line breaks for specific patterns
-                .replace(/([^.\n])\n(?=[A-Z])/g, '$1\n\n')  // Add extra newline before capital letters
-                .replace(/([.!?])\s*\n/g, '$1\n\n')         // Add extra newline after sentence endings
-                .replace(/\n([-\d#>*])/g, '\n\n$1')         // Add extra newline before list items and headers
-                .replace(/([^-\d#>*\n])\n([^-\d#>*\n])/g, '$1 $2')  // Join normal text lines
+                // --- Simplified Cleanup ---
+                .replace(/^[ \t]+|[ \t]+$/gm, '') // Remove leading/trailing whitespace from each line
+                .replace(/\n{3,}/g, '\n\n')       // Reduce three or more newlines to exactly two
+                .trim();                           // Trim leading/trailing whitespace from the whole string
 
-                // Add extra newlines before numbers and backticks
-                .replace(/(\n|^)(\d+\.)/g, '$1\n\n$2') // Add extra newline before numbered lists outside of environments
-                .replace(/(\n|^)(`)/g, '$1\n\n$2') // Add extra newline before backticks outside of environments
-                .replace(/(\n|^)(```)/g, '$1\n\n$2') // Add extra newline before code blocks outside of environments
+            // Combine title, author, date, and main content
+            let finalOutput = title + author + date + markdown;
 
-                // Add extra newlines after list items and before headers
-                .replace(/(\n- )(.*?)(\n(?=[#\d]))/g, '$1$2\n\n') // Add extra newline after list items before headers or numbers
-                .replace(/(\n\d+\. )(.*?)(\n(?=[#\d]))/g, '$1$2\n\n') // Add extra newline after numbered list items before headers or numbers
-
-                // Final cleanup
-                .replace(/\n{3,}/g, '\n\n')        // Clean up any triple+ newlines
-                .trim();                           // Trim the final result
-
-            // Combine all elements with proper spacing
-            markdown = title + author + date + markdown;
-
-            // Ensure proper spacing between sections
-            markdown = markdown
-                .replace(/\n# /g, '\n\n# ')        // Add space before headers
-                .replace(/\n## /g, '\n\n## ')      // Add space before subheaders
-                .replace(/\n### /g, '\n\n### ')    // Add space before subsubheaders
-                .replace(/\n- /g, '\n\n- ')        // Add space before list items
-                .replace(/\n\d+\. /g, '\n\n$&')    // Add space before numbered lists
-                .replace(/```\n\n/g, '```\n')      // Fix code block spacing
-                .replace(/\n\n```/g, '\n```')      // Fix code block spacing
-                .replace(/\n{3,}/g, '\n\n')        // Clean up any resulting triple newlines
+            // Final pass to ensure block elements are separated correctly
+            // Use lookarounds to avoid consuming characters needed for matching
+            finalOutput = finalOutput
+                .replace(/(?<=\S)\n(?=#{1,6} )/g, '\n\n')      // Ensure blank line before headers
+                .replace(/(?<=\S)\n(?=(- |\* |\d+\. ))/g, '\n\n') // Ensure blank line before list items
+                .replace(/(?<=\S)\n(?=```)/g, '\n\n')    // Ensure blank line before code blocks
+                .replace(/(?<=```)\n(?=\S)/g, '\n\n')    // Ensure blank line after code blocks
+                .replace(/(?<=\S)\n(?=\*)/g, '\n\n')     // Ensure blank line before italic block (like abstract) - might need refinement
+                .replace(/(?<=\*)\n(?=\S)/g, '\n\n')     // Ensure blank line after italic block (like abstract) - might need refinement
+                // Ensure blank line between list item and next header/list/code/italic
+                .replace(/(?<=\n(- |\* |\d+\. ).*)\n(?=#{1,6} |- |\* |\d+\. |```|\*)/g, '\n\n')
+                .replace(/\n{3,}/g, '\n\n') // Consolidate multiple newlines again
                 .trim();
 
+
             // Display the converted Markdown
-            document.getElementById("markdownOutput").value = markdown || "Conversion failed";
+            document.getElementById("markdownOutput").value = finalOutput || "Conversion failed or empty input.";
         }
 
-        async function copyOutput() {
-            const output = document.getElementById("markdownOutput").value;
+
+        async function copyOutput(event) { // Accept event object
+            const outputArea = document.getElementById("markdownOutput");
+            const output = outputArea.value;
+            const copyButton = event.target; // Use event.target
+            const originalText = copyButton.textContent;
+
+            if (!output) return; // Don't try to copy if empty
+
             try {
                 await navigator.clipboard.writeText(output);
-                
-                // Visual feedback
-                const copyButton = event.target;
-                const originalText = copyButton.textContent;
                 copyButton.textContent = "Copied!";
+            } catch (err) {
+                console.warn('Async clipboard copy failed, trying fallback:', err);
+                // Fallback for older browsers or environments without clipboard API access
+                outputArea.select(); // Select the text
+                 outputArea.setSelectionRange(0, 99999); // For mobile devices
+
+                try {
+                    document.execCommand("copy");
+                    copyButton.textContent = "Copied! (Fallback)";
+                } catch (errFallback) {
+                    console.error('Fallback copy failed: ', errFallback);
+                    copyButton.textContent = "Copy Failed";
+                }
+                // Deselect text after fallback attempt
+                window.getSelection().removeAllRanges();
+            } finally {
+                // Reset button text after 2 seconds
                 setTimeout(() => {
                     copyButton.textContent = originalText;
                 }, 2000);
-            } catch (err) {
-                // Fallback for older browsers
-                const output = document.getElementById("markdownOutput");
-                output.select();
-                try {
-                    document.execCommand("copy");
-                    
-                    // Visual feedback
-                    const copyButton = event.target;
-                    const originalText = copyButton.textContent;
-                    copyButton.textContent = "Copied!";
-                    setTimeout(() => {
-                        copyButton.textContent = originalText;
-                    }, 2000);
-                } catch (err) {
-                    console.error('Failed to copy text: ', err);
-                }
             }
         }
 
@@ -378,10 +429,23 @@
             const currentTheme = body.getAttribute("data-theme");
             if (currentTheme === "dark") {
                 body.removeAttribute("data-theme");
+                localStorage.setItem('theme', 'light'); // Optional: Persist theme
             } else {
                 body.setAttribute("data-theme", "dark");
+                localStorage.setItem('theme', 'dark'); // Optional: Persist theme
             }
         }
+
+        // Optional: Load persisted theme on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                document.body.setAttribute('data-theme', 'dark');
+            }
+            // Optionally set initial focus
+            // document.getElementById('latexInput').focus();
+        });
+
     </script>
 </body>
 </html>
